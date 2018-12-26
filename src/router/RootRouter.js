@@ -12,6 +12,8 @@ import Account from 'bundle-loader?lazy&name=account!@/pages/account';
 import CreateAccount from 'bundle-loader?lazy&name=createAccount!@/pages/account/CreateAccount';
 import Page404 from 'bundle-loader?lazy&name=page404!@/pages/common/Page404';
 import Viewtrans from 'bundle-loader?lazy&name=viewtrans!@/pages/trans/Viewtrans';
+import Token from 'bundle-loader?lazy&name=viewtrans!@/pages/token';
+import ViewToken from 'bundle-loader?lazy&name=viewtrans!@/pages/token/Viewtoken';
 const createComponent = (component)=>(props)=>(
     <Bundle load={component}>
         {
@@ -33,6 +35,8 @@ export default class RootRouter extends Component{
                 <Route path="/createAccount" component={createComponent(CreateAccount)}/>
                 <Route path="/transfer" component={createComponent(Transfer)}/>
                 <Route path="/viewtrans" component={createComponent(Viewtrans)}/>
+                <Route path="/token" component={createComponent(Token)}/>
+                <Route path="/viewtoken" component={createComponent(ViewToken)}/>
                 <Route component={createComponent(Page404)}/>
             </Switch>
         )

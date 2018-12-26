@@ -1,6 +1,17 @@
 import React from 'react';
 
 const en_US= {
+    "Id":"ID",
+    "accountid":"accountid",
+    "source":"source",
+    "title":"title",
+    "createdt":"createdt",
+    "tokenname":"tokenname",
+    "saveflag":"saveflag",
+    "savedt":"savedt", 
+    "memo":"memo",
+    "tokenInfo":"tokenInfo",
+    "token":"token",
     "value":"value",
     "name":"name",
     "block":"Block",

@@ -12,7 +12,7 @@ const menus = [
     {title:'block',url:'/block',index:0},
     {title:'trans',url:'/trans',index:1},
     {title:'balance',url:'/peer',index:2},
-    /*{title:'account',url:'/account',index:3}*/
+    {title:'token',url:'/token',index:3},
 ];
 
 const tools = [

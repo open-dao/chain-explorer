@@ -1,6 +1,17 @@
 import React from 'react';
 
 const zh_CN= {
+    "Id":"ID",
+    "accountid":"账户ID",
+    "source":"来源",
+    "title":"说明",
+    "createdt":"创建时间",
+    "tokenname":"名称",
+    "saveflag":"是否上链",
+    "savedt":"上链时间", 
+    "memo":"备注",
+    "token":"代币信息",
+    "token":"代币",
     "value":"值",
     "name":"名称",
     "block":"区块",
