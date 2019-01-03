@@ -6,12 +6,34 @@ import locale from '@/components/locale';
 import Container from '@/components/Container';
 import currencys from '@/components/token/index.js';
 import {Link} from 'react-router-dom';
+import BlockService from '../../service/BlockService'
+import ViewtransService from '../../service/ViewtransService'
 import './index.css';
 
 locale.init();
 class Trans extends Component {
     constructor(props) {
         super(props);
+        this.transHashList =[];
+        this.othertransColumns = [{
+            title:locale.get('blockNumber'),
+            dataIndex:'blockNumber',
+            key:'blockNumber'
+        },{
+            title:locale.get('from'),
+            dataIndex:'from',
+            key:'from'
+        },{
+            title:locale.get('hash'),
+            dataIndex:'hash',
+            key:'hash'
+        },{
+            title:locale.get('data'),
+            dataIndex:'data',
+            key:'data',
+            width:50,
+            render:(text,item)=><Button><Link to={{pathname:'./viewTrans',state:item.hash}}>{locale.get('view')}</Link></Button>
+        }];
         this.transColumns = [{
             title:locale.get('name'),
             dataIndex:'name',
@@ -65,7 +87,7 @@ class Trans extends Component {
             transactionHash:"",//交易的哈希或者账户地址
             firstVisit:true,//第一次进入该页面
             dataTotal:0, //获取总的数据条数
-            tem_dataList:[],//获取总的数据数组
+            tem_dataList:[],//获取最近交易的数据数组
             loopfinish:true,//循环post是否结束
             isChangeToken:false,//是否是搜索状态
         };
@@ -78,6 +100,44 @@ class Trans extends Component {
         this.handleCancel = this.handleCancel.bind(this);
         this.chooseDifferentCurrency = this.chooseDifferentCurrency.bind(this);
         this.search = this.search.bind(this);
+    }
+    componentDidMount() {
+        let that = this;
+        // 获取最新的block的id
+        BlockService.getCurrentBlockId().then((ret)=>{
+            let _that = that;
+            let tem_currentBlockId = ret.data.data.msg.head.currentBlock;
+             console.log(tem_currentBlockId);
+            for(let i = tem_currentBlockId;i > tem_currentBlockId-4000;i-=30) {
+                let maxId =i,minId= i-29;
+                 console.log(maxId+'--'+minId);// 从最新的blockId开始向后搜索1000个数据
+                BlockService.getCurrentTransInfo(maxId, minId).then((ret) => {
+                    let _that_ = _that;
+                    let transList = ret.data.data.msg.detail;
+                    for(let j=0;j<transList.length;j++){
+                        if(transList[j].transactions.length > 0){
+                            //如果有交易的信息我们就根据交易的哈希去获取交易信息
+                            for(let k=0;k<transList[j].transactions.length;k++){
+                                let tem_hash = transList[j].transactions[k]
+                                ViewtransService.getViewtransDetail(tem_hash).then((ret)=> {
+                                    let tem_obj = ret.data.data.msg.head;
+                                    // 把交易的信息保存下来
+                                    _that_.setState({
+                                        tem_dataList:[..._that_.state.tem_dataList,tem_obj],
+                                        firstVisit:false
+                                    })
+                                })
+                            }
+                        }
+                    }
+                })
+            }
+        });
+        setTimeout(()=> {
+            if(this.state.firstVisit === true){
+                this.setState({firstVisit: false})
+            }
+        },5000)
     }
     handleOnTableChange(cur){
         if(cur<1 || cur>this.state.pagination.pageTotal ){
@@ -121,6 +181,7 @@ class Trans extends Component {
         this.setState({currencyKind:key})
     }
     search(){
+        console.log(this.state.tem_dataList);
         this.state.pagination.current= 1;
         this.state.pagination.pageSize= 10;
         this.state.firstVisit?
@@ -136,7 +197,7 @@ class Trans extends Component {
         if(transList!=null&&transList.length>=0){
             this.state.pagination.bookmark=transList; 
         }
-        console.log(this.state.pagination.bookmark);
+        // console.log(this.state.pagination.bookmark);
         if(transTotal>0){
             this.state.pagination.pageTotal=Math.ceil(transTotal/this.state.pagination.pageSize);
         }
@@ -161,28 +222,46 @@ class Trans extends Component {
                 </Row>
                 <div style={{height:20}}></div>
                     {
-                        this.state.firstVisit?null:
+                        //this.state.firstVisit?null:
                         //trans.errorMsg?trans.errorMsg:
-                        this.state.loopfinish?null:
-                        <Spin tip={locale.get("dataLoading")} spinning={false}>
-                            <Table
-                                dataSource={this.state.pagination.bookmark}
-                                columns={this.transColumns}
-                                bordered
-                                rowKey="transactionhash"
-                                pagination={false}
-                            />
-                            <ul className="ant-pagination ant-table-pagination">
-                                <li title="Previous Page" tabIndex={0} className={this.state.pagination.prev==true?"ant-pagination-enable ant-pagination-item":"ant-pagination-disabled ant-pagination-item"} >
-                                    <a className="ant-pagination-item-link" onClick={this.handlePrevPage}>上一页</a>
-                                </li>
-                                <li title="2/5" className="ant-pagination-item" style={{border:0}}>
-                                    {this.state.pagination.current}<span>／</span>{this.state.pagination.pageTotal}
-                                </li>
-                                <li title="Next Page" tabIndex={0} className={this.state.pagination.next==true?"ant-pagination-enable ant-pagination-item":"ant-pagination-disabled ant-pagination-item"} >
-                                    <a className="ant-pagination-item-link" onClick={this.handleNextPage}>下一页</a>
-                                </li>
-                            </ul>
+                        // this.state.loopfinish?null:
+                        <Spin tip={locale.get("dataLoading")} spinning={this.state.firstVisit}>
+                            {
+                                this.state.transactionHash == ''?
+                                <div>
+                                    <h3>{locale.get('transInfo')}</h3>
+                                    <Table
+                                    dataSource={this.state.tem_dataList}
+                                    columns={this.othertransColumns}
+                                    bordered
+                                    rowKey="hash"
+                                    pagination={false}
+                                    />
+                                </div>
+                                :
+                                <div>
+                                     <Table
+                                        dataSource={this.state.pagination.bookmark}
+                                        columns={this.transColumns}
+                                        bordered
+                                        rowKey="transactionhash"
+                                        pagination={false}
+                                     />
+                                    <ul className="ant-pagination ant-table-pagination">
+                                        <li title="Previous Page" tabIndex={0} className={this.state.pagination.prev==true?"ant-pagination-enable ant-pagination-item":"ant-pagination-disabled ant-pagination-item"} >
+                                            <a className="ant-pagination-item-link" onClick={this.handlePrevPage}>上一页</a>
+                                        </li>
+                                        <li title="2/5" className="ant-pagination-item" style={{border:0}}>
+                                            {this.state.pagination.current}<span>／</span>{this.state.pagination.pageTotal}
+                                        </li>
+                                        <li title="Next Page" tabIndex={0} className={this.state.pagination.next==true?"ant-pagination-enable ant-pagination-item":"ant-pagination-disabled ant-pagination-item"} >
+                                            <a className="ant-pagination-item-link" onClick={this.handleNextPage}>下一页</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                               
+                            }
+                            
                             <Modal
                                 title={locale.get('transData')}
                                 visible={this.state.visible}
