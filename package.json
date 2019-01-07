@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "chain-explorer",
   "scripts": {
-    "start": "webpack-dev-server --config webpack.dev.config.js --hot --inline --port 8080 --host 0.0.0.0",
+    "start": "webpack-dev-server --config webpack.dev.config.js --hot --inline --port 9000 --host 0.0.0.0",
     "build": "webpack --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

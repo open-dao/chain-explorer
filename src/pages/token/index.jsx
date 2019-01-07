@@ -21,6 +21,10 @@ const columns = [{
   dataIndex:'amount',
   key:'amount',
 },{
+  title:locale.get('tokenname'),
+  dataIndex:'tokenname',
+  key:'tokenname',
+},{
   title:locale.get('title'),
   dataIndex:'title',
   key:'title',
@@ -28,10 +32,6 @@ const columns = [{
   title:locale.get('createdt'),
   dataIndex:'createdt',
   key:'createdt',
-},{
-  title:locale.get('tokenname'),
-  dataIndex:'tokenname',
-  key:'tokenname',
 },{
   title:locale.get('view'),
   dataIndex:'view',
